@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Log in - ClefQuest</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  </head>
+  <body>
+    <main class="center-panel">
+      <h2>Log in</h2>
+  <p><a href="{{ url_for('index') }}" class="muted-link">Back home</a></p>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flashes">{% for category, msg in messages %}<div class="flash {{ category }}">{{ msg }}</div>{% endfor %}</div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="post" action="{{ url_for('login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="username">Username</label>
+  <input id="username" name="username" type="text" required autofocus>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required>
+
+        <div class="form-actions">
+          <button type="submit">Log in</button>
+          <a href="{{ url_for('register') }}" class="muted-link">Need an account? Register</a>
+        </div>
+      </form>
+    </main>
+  </body>
+</html>

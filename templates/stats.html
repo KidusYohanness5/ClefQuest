@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Stats — ClefQuest</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  </head>
+  <body>
+    <main class="center-panel">
+      <h2>My Stats</h2>
+      <p><a href="{{ url_for('index') }}" class="muted-link">Back home</a></p>
+
+      <section class="stats-summary">
+        <p>Total rounds played: {{ agg['cnt'] or 0 }}</p>
+        <p>Total score: {{ agg['total'] or 0 }}</p>
+        <br>
+        <p>Average score: {{ ('%.2f' % agg['avg_score']) if agg['avg_score'] is not none else '—' }}</p>
+        <p>Average Easy score: {{ ('%.2f' % avg_easy) if avg_easy is not none else '—' }}</p>
+        <p>Average Medium score: {{ ('%.2f' % avg_medium) if avg_medium is not none else '—' }}</p>
+        <p>Average Hard score: {{ ('%.2f' % avg_hard) if avg_hard is not none else '—' }}</p>
+        <br>
+         <p><strong>Your ClefScore: {{ clefscore }}</strong></p>
+        <div class="clef-evolution">
+          <h4>ClefScore over time</h4>
+          <div id="clef_evolution" class="clef-evolution-canvas">
+            <!-- SVG sparkline inserted by inline script -->
+          </div>
+        </div>
+      </section>
+
+      <h3>Recent rounds</h3>
+      {% if recent %}
+        <table class="stats-table">
+          <thead><tr><th>When</th><th>Score</th><th>Details</th></tr></thead>
+          <tbody>
+          {% for row in recent %}
+            <tr>
+              <td>{{ row['created_at'] }}</td>
+              <td>{{ row['score'] }}</td>
+              <td>
+                {% if row['meta_pretty'] %}{{ row['meta_pretty'] }}<br>{% endif %}
+                {% if row.get('clef_delta') is not none %}
+                  ClefScore change: {{ '+' if row['clef_delta'] >= 0 else '' }}{{ row['clef_delta'] }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No scores yet — play a round and save your score.</p>
+      {% endif %}
+      <script id="clefseries-data" type="application/json">{{ clefseries|tojson }}</script>
+
+      <!-- Chart.js from CDN with local fallback to static/vendor/chart.min.js -->
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+        (function() {
+          // helper to load local fallback if CDN didn't set window.Chart
+          function ensureChart(callback) {
+            if (window.Chart) return callback();
+            const s = document.createElement('script');
+            s.src = "{{ url_for('static', filename='vendor/chart.min.js') }}";
+            s.onload = callback;
+            s.onerror = callback; // still call to avoid blocking
+            document.head.appendChild(s);
+          }
+
+          function init() {
+            let clefSeries = [];
+            try {
+              const el = document.getElementById('clefseries-data');
+              clefSeries = el && el.textContent ? JSON.parse(el.textContent) : [];
+            } catch (e) { clefSeries = []; }
+            if (!clefSeries.length) return;
+
+            const container = document.getElementById('clef_evolution');
+            // create canvas and size it so container can scroll horizontally
+            const pointStep = 60;
+            const padding = 36;
+            const n = clefSeries.length;
+            const totalW = Math.max(680, (n - 1) * pointStep + padding * 2);
+            const height = 220;
+
+            const canvas = document.createElement('canvas');
+            canvas.id = 'clef_chart';
+            canvas.width = totalW;
+            canvas.height = height;
+            canvas.style.width = totalW + 'px';
+            canvas.style.height = height + 'px';
+            container.appendChild(canvas);
+            container.classList.add('chart-scrollable');
+
+            // Option: use constant spacing between rounds (category axis) so long time gaps
+            // don't create huge empty spaces. We still show full local timestamps in tooltips.
+            const labels = clefSeries.map(p => {
+              try { return new Date(p.created_at).toLocaleString(); } catch (e) { return String(p.created_at); }
+            });
+            const values = clefSeries.map(p => Number(p.clefscore));
+
+            const ctx = canvas.getContext('2d');
+            const chart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [{
+                  label: 'ClefScore',
+                  data: values,
+                  fill: true,
+                  backgroundColor: 'rgba(11,118,239,0.06)',
+                  borderColor: '#0b76ef',
+                  pointBackgroundColor: '#0b76ef',
+                  tension: 0.15,
+                  pointRadius: 4
+                }]
+              },
+              options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    type: 'category',
+                    title: { display: false },
+                    ticks: { display: false }
+                  },
+                  y: {
+                    display: true,
+                    beginAtZero: false
+                  }
+                },
+                plugins: {
+                  tooltip: {
+                    callbacks: {
+                      // We want the tooltip body (label) to be the numeric ClefScore only,
+                      // and show the local timestamp as a secondary line (footer).
+                      // Return empty title to avoid repeating the date in the title.
+                      title: function(items) { return ''; },
+                      label: function(context) {
+                        const idx = context.dataIndex;
+                        const entry = clefSeries[idx] || {};
+                        const scoreVal = entry.clefscore ?? context.formattedValue;
+                        // Ensure it's a plain number string (no extra prefix)
+                        return String(scoreVal);
+                      },
+                      footer: function(items) {
+                        if (!items || !items.length) return '';
+                        const idx = items[0].dataIndex;
+                        const entry = clefSeries[idx] || {};
+                        try { return new Date(entry.created_at).toLocaleString(); } catch (e) { return entry.created_at || ''; }
+                      }
+                    }
+                  },
+                  legend: { display: false }
+                }
+              }
+            });
+          }
+
+          // ensure Chart.js is loaded, then ensure the date-fns adapter, then init
+          function ensureAdapter(cb) {
+            // try CDN bundle (includes date-fns). Fallback to local vendor copy.
+            const cdn = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@^2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js';
+            const local = "{{ url_for('static', filename='vendor/chartjs-adapter-date-fns.bundle.min.js') }}";
+            function load(src, onload) {
+              const s = document.createElement('script');
+              s.src = src;
+              s.onload = onload;
+              s.onerror = onload; // continue even if error
+              document.head.appendChild(s);
+            }
+            load(cdn, function() {
+              // if adapter didn't register, try local fallback then callback
+              try { return cb(); } catch (e) { load(local, cb); }
+            });
+          }
+
+          ensureChart(function() { ensureAdapter(init); });
+        })();
+      </script>
+    </main>
+  </body>
+</html>

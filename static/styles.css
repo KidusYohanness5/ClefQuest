@@ -1,0 +1,317 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  padding: 20px;
+  background: #fafafa;
+  color: #222;
+}
+
+/* Header / auth link layout */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 960px;
+  margin: 0 auto 12px auto;
+  padding: 0 10px;
+}
+.site-header h1 { margin: 0; font-size: 20px; }
+.auth-links { font-size: 14px; color: #333; }
+.auth-links a { color: #0366d6; text-decoration: none; }
+.auth-links a:hover { text-decoration: underline; }
+
+/* Inline logout form styled to look like a link */
+.auth-logout-form { display: inline; margin: 0; padding: 0; }
+.auth-logout-form .link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #0366d6;
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+}
+.auth-logout-form .link-button:hover { text-decoration: underline; }
+
+/* Stats table */
+.stats-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.stats-table th, .stats-table td { padding: 8px 10px; border: 1px solid #e6e6e6; text-align: left; }
+.stats-summary p { margin: 6px 0; }
+
+h1 {
+  text-align: center;
+}
+
+#staff_container {
+  width: 700px;
+  height: 150px;
+  margin: 20px auto;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  border-radius: 6px;
+  padding-top: 6px;
+}
+
+/* Layout: main area + range sidebar */
+.layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 18px;
+}
+
+.main-area {
+  width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+#range_container {
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.aside-stats-box {
+  width: 120px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.aside-stats-box .big-stat {
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+}
+
+#controls {
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0 0 0;
+}
+
+/* Top controls above the staff */
+.top-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto 8px auto;
+}
+.top-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.top-right { display: flex; gap: 8px; align-items: center; }
+.timed-inline { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Settings box below the staff: center contents vertically */
+#game_settings {
+  display: flex;
+  align-items: center; /* vertically center text and buttons */
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+#game_settings p#question_label { margin: 0; font-weight: 600; }
+#game_settings button { margin-left: 6px; }
+
+@media (max-width: 520px) {
+  #game_settings { flex-direction: column; align-items: center; gap: 8px; }
+}
+
+#note_input {
+  font-size: 18px;
+  padding: 6px 8px;
+  width: 80px;
+  text-align: center;
+}
+
+#feedback {
+  margin-top: 8px;
+  height: 22px;
+}
+
+#game_settings {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.score {
+  margin-left: 1rem;
+  font-weight: 600;
+}
+
+
+.timed-block {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: center;
+}
+
+.time-limit {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+@media (max-width: 520px) {
+  #game_settings { width: 100%; }
+  .timed-block { flex-direction: column; align-items: stretch; }
+  .time-limit { justify-content: space-between; }
+}
+
+#note_buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 10px;
+  justify-items: center;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 420px; /* keep buttons from stretching too wide */
+}
+#note_buttons button {
+  padding: 6px 8px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+}
+#note_buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Range selector styles */
+#range_label {
+  font-size: 13px;
+  color: #333;
+}
+#range_selector {
+  position: relative;
+  width: 100px;
+  height: 420px; /* extended to fit full Ab3 -> C#6 range */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#range_track {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(#e0e0e0, #e0e0e0);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.tick {
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0%;
+  font-size: 11px;
+  color: #333;
+}
+.tick.in-range {
+  background: #cfe8ff; /* blue-ish for selected range */
+}
+
+
+@media (max-width: 520px) {
+  #range_selector { height: 200px; }
+}
+
+/* Small form utilities for auth pages */
+.center-panel {
+  max-width: 420px;
+  margin: 24px auto;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.form-actions {
+  margin-top: 12px;
+}
+.flashes { list-style: none; padding: 0; margin: 8px 0; }
+.flashes .flash { padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 14px; }
+.flashes .flash.error { background: #ffecec; color: #8a1f11; border: 1px solid #f5c6c2; }
+.flashes .flash.success { background: #e9f7ec; color: #0b6c2a; border: 1px solid #cfe9d3; }
+.muted-link { margin-left: 12px; color: #666; text-decoration: none; font-size: 14px; }
+.muted-link:hover { text-decoration: underline; }
+
+/* Stack form fields (label + input) for auth pages */
+.center-panel form label {
+  display: block;
+  margin-top: 12px;
+  font-weight: 600;
+}
+.center-panel form input[type="text"],
+.center-panel form input[type="password"],
+.center-panel form input[type="email"],
+.center-panel form input[type="number"] {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* ClefScore evolution sparkline container */
+.clef-evolution-canvas {
+  width: 100%;
+  max-width: 800px;
+  margin-top: 8px;
+}
+
+/* make the chart container horizontally scrollable and positioned for tooltip */
+.chart-scrollable {
+  overflow-x: auto;
+  position: relative;
+  padding-bottom: 6px;
+}
+
+/* tooltip that follows mouse */
+.chart-tooltip {
+  position: absolute;
+  z-index: 40;
+  pointer-events: none;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #111;
+  min-width: 120px;
+}

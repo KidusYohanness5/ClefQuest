@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClefQuest</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Load VexFlow from CDN; fall back to local copy on error -->
+        <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+        <script>
+            // If CDN load fails or VexFlow is not available, load local fallback
+            if (!window.Vex || !window.Vex.Flow) {
+                var s = document.createElement('script');
+                s.src = "{{ url_for('static', filename='vendor/vexflow.min.js') }}";
+                s.onload = function(){ console.log('Loaded local VexFlow fallback'); };
+                s.onerror = function(){ console.error('Failed to load local VexFlow fallback'); };
+                document.head.appendChild(s);
+            }
+        </script>
+    <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Favicon to prevent browser requesting /favicon.ico -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+</head>
+<body>
+        <header class="site-header">
+            <h1>ClefQuest - Sight Reading Trainer</h1>
+                                    {% if current_user %}
+                                            <div class="auth-links">Welcome, {{ current_user['username'] }} — <a href="{{ url_for('stats') }}">My Stats</a>
+                                                <form method="post" action="{{ url_for('logout') }}" class="auth-logout-form">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                    <button type="submit" class="link-button">Logout</button>
+                                                </form>
+                                            </div>
+                        {% else %}
+                                <div class="auth-links"><a href="{{ url_for('login') }}">Log in</a> / <a href="{{ url_for('register') }}">Register</a></div>
+                        {% endif %}
+        </header>
+
+    <div class="layout">
+            <main class="main-area">
+                <div class="top-controls">
+                    <div class="top-left">
+                        <!-- Moved settings: difficulty, timed, seconds, questions -->
+                        <label for="difficulty_select">Difficulty:</label>
+                        <select id="difficulty_select" name="difficulty" aria-label="Difficulty">
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                        </select>
+
+                        <label for="timed_check" class="timed-inline">
+                            <input type="checkbox" id="timed_check" checked/>
+                            <span>Timed</span>
+                        </label>
+                        <label for="time_limit">Seconds per question:</label>
+                        <input type="number" id="time_limit" min="3" max="60" value="8" aria-label="Seconds per question">
+
+                        <label for="questions_per_round">Questions:</label>
+                        <select id="questions_per_round" aria-label="Questions per round">
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="50">50</option>
+                                <option value="0">Unlimited</option>
+                        </select>
+                    </div>
+                                <div class="top-right">
+                                    <!-- intentionally left blank: action buttons remain in the settings box below the staff -->
+                                </div>
+                </div>
+
+                <div id="staff_container"></div>
+
+                <div id="controls">
+                    <div id="game_settings" aria-label="Game settings">
+                        <p id="question_label">What note is this? (A, B, C, D, E, F, G)</p>
+                        <!-- action buttons belong in this settings box -->
+                        <button id="enable_sound_btn" type="button">Enable sound</button>
+                        <button id="start_round_btn" type="button">Start Round</button>
+                        <button id="stop_round_btn" type="button" disabled>Stop</button>
+                    </div>
+                    <label for="note_input">Your answer:</label>
+            <input type="text" id="note_input" maxlength="2" autofocus placeholder="A, A#, Bb" title="Enter the note (A, A#, Bb)" aria-label="Note (A, A#, Bb)">
+            <div id="note_buttons" aria-label="Note buttons">
+            <!-- Buttons from A-flat to G#; includes enharmonic spellings like B# and E# -->
+            <button type="button" data-note="Ab">Ab</button>
+            <button type="button" data-note="A">A</button>
+            <button type="button" data-note="A#">A#</button>
+            <button type="button" data-note="Bb">Bb</button>
+            <button type="button" data-note="B">B</button>
+            <button type="button" data-note="B#">B#</button>
+            <button type="button" data-note="Cb">Cb</button>
+            <button type="button" data-note="C">C</button>
+            <button type="button" data-note="C#">C#</button>
+            <button type="button" data-note="Db">Db</button>
+            <button type="button" data-note="D">D</button>
+            <button type="button" data-note="D#">D#</button>
+            <button type="button" data-note="Eb">Eb</button>
+            <button type="button" data-note="E">E</button>
+            <button type="button" data-note="E#">E#</button>
+            <button type="button" data-note="Fb">Fb</button>
+            <button type="button" data-note="F">F</button>
+            <button type="button" data-note="F#">F#</button>
+            <button type="button" data-note="Gb">Gb</button>
+            <button type="button" data-note="G">G</button>
+            <button type="button" data-note="G#">G#</button>
+        </div>
+        <div id="feedback" role="status" aria-live="polite"></div>
+    </div>
+
+            </main>
+
+            <aside id="range_container" aria-label="Note range selector">
+                <div id="aside_stats_box" class="aside-stats-box" aria-live="polite">
+                    <div id="timer_display" class="big-stat">Time: —</div>
+                    <div id="score_display" class="big-stat">Score: 0</div>
+                </div>
+                <div id="range_label">Range</div>
+                <div id="range_selector">
+                    <div id="range_track" aria-hidden="true"></div>
+                </div>
+            </aside>
+
+        </div>
+
+    <script src="{{ url_for('static', filename='game.js') }}"></script>
+</body>
+</html>

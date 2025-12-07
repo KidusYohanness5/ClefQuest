@@ -1,0 +1,43 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Environment
+.env
+.python-version
+
+# Database
+# If you want to commit a seeded database for demos, remove these lines.
+# By default the project creates `database.db` at runtime; track it only if
+# you intentionally want to include a pre-filled DB in the repo.
+# database.db
+# *.sqlite3
+
+# Node
+node_modules/
+
+# Static vendor builds (optional) - uncomment if you don't want to commit them
+# static/vendor/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Logs
+*.log
+run.pid
+
+# Byte-compiled / caches
+htmlcov/
+.coverage
+.coverage.*
+.cache/
+.pytest_cache/
+
+# Mac
+.Spotlight-V100
+.Trashes
