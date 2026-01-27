@@ -2,8 +2,6 @@
 
 ClefQuest is a browser-based sight-reading practice game served by a Python/Flask backend. The client uses JavaScript (VexFlow for notation, Tone.js for audio) and saves per-user rounds to a local SQLite database.
 
-This README is a short, practical guide to run and use the project locally.
-
 ## Quick start (macOS / zsh)
 
 Install dependencies for your user:
